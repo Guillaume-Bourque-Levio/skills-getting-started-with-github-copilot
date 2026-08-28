@@ -1,50 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mergington High School Activities</title>
+    <title>Mes reçus</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header>
-      <h1>Mergington High School</h1>
-      <h2>Extracurricular Activities</h2>
+      <div>
+        <p class="eyebrow">ORGANISATION PERSONNELLE</p>
+        <h1>Mes reçus</h1>
+        <p>Gardez vos dépenses à portée de main.</p>
+      </div>
+      <div class="total-box">
+        <span>Total enregistré</span>
+        <strong id="total-amount">0,00 €</strong>
+      </div>
     </header>
 
     <main>
-      <section id="activities-container">
-        <h3>Available Activities</h3>
-        <div id="activities-list">
-          <!-- Activities will be loaded here -->
-          <p>Loading activities...</p>
-        </div>
+      <section class="panel form-panel">
+        <h2>Ajouter un reçu</h2>
+        <form id="receipt-form">
+          <label for="merchant">Commerçant</label>
+          <input id="merchant" name="merchant" required maxlength="100" placeholder="Ex. Épicerie du coin" />
+          <div class="row">
+            <div>
+              <label for="amount">Montant (€)</label>
+              <input id="amount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0,00" />
+            </div>
+            <div>
+              <label for="date">Date</label>
+              <input id="date" name="date" type="date" required />
+            </div>
+          </div>
+          <label for="category">Catégorie</label>
+          <select id="category" name="category" required>
+            <option value="">Choisir une catégorie</option>
+            <option>Alimentation</option>
+            <option>Transport</option>
+            <option>Logement</option>
+            <option>Loisirs</option>
+            <option>Autre</option>
+          </select>
+          <label for="notes">Notes <span>(facultatif)</span></label>
+          <textarea id="notes" name="notes" maxlength="500" rows="3" placeholder="Une précision..."></textarea>
+          <button type="submit">+ Enregistrer le reçu</button>
+        </form>
+        <p id="message" class="message hidden" role="status"></p>
       </section>
 
-      <section id="signup-container">
-        <h3>Sign Up for an Activity</h3>
-        <form id="signup-form">
-          <div class="form-group">
-            <label for="email">Student Email:</label>
-            <input type="email" id="email" required placeholder="your-email@mergington.edu" />
+      <section class="panel">
+        <div class="list-heading">
+          <div>
+            <h2>Mes reçus</h2>
+            <p id="receipt-count">0 reçu</p>
           </div>
-          <div class="form-group">
-            <label for="activity">Select Activity:</label>
-            <select id="activity" required>
-              <option value="">-- Select an activity --</option>
-              <!-- Activity options will be loaded here -->
-            </select>
-          </div>
-          <button type="submit">Sign Up</button>
-        </form>
-        <div id="message" class="hidden"></div>
+          <select id="category-filter" aria-label="Filtrer par catégorie">
+            <option value="">Toutes les catégories</option>
+          </select>
+        </div>
+        <div id="receipts-list"><p class="empty">Aucun reçu pour le moment.</p></div>
       </section>
     </main>
-
-    <footer>
-      <p>&copy; 2023 Mergington High School</p>
-    </footer>
-
     <script src="app.js"></script>
   </body>
 </html>

@@ -1,45 +1,33 @@
-"""
-High School Management System API
+"""Receipt management API."""
 
-A super simple FastAPI application that allows students to view and sign up
-for extracurricular activities at Mergington High School.
-"""
+from datetime import date
+from pathlib import Path
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
-import os
-from pathlib import Path
+from pydantic import BaseModel, Field
+from starlette.responses import RedirectResponse
 
-app = FastAPI(title="Mergington High School API",
-              description="API for viewing and signing up for extracurricular activities")
 
-# Mount the static files directory
+class ReceiptCreate(BaseModel):
+    merchant: str = Field(..., min_length=1, max_length=100)
+    amount: float = Field(..., gt=0)
+    date: date
+    category: str = Field(..., min_length=1, max_length=50)
+    notes: Optional[str] = Field(default="", max_length=500)
+
+
+class Receipt(ReceiptCreate):
+    id: int
+
+
+app = FastAPI(title="Receipt Manager API", description="Manage personal receipts")
 current_dir = Path(__file__).parent
-app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
-          "static")), name="static")
+app.mount("/static", StaticFiles(directory=current_dir / "static"), name="static")
 
-# In-memory activity database
-activities = {
-    "Chess Club": {
-        "description": "Learn strategies and compete in chess tournaments",
-        "schedule": "Fridays, 3:30 PM - 5:00 PM",
-        "max_participants": 12,
-        "participants": ["michael@mergington.edu", "daniel@mergington.edu"]
-    },
-    "Programming Class": {
-        "description": "Learn programming fundamentals and build software projects",
-        "schedule": "Tuesdays and Thursdays, 3:30 PM - 4:30 PM",
-        "max_participants": 20,
-        "participants": ["emma@mergington.edu", "sophia@mergington.edu"]
-    },
-    "Gym Class": {
-        "description": "Physical education and sports activities",
-        "schedule": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
-        "max_participants": 30,
-        "participants": ["john@mergington.edu", "olivia@mergington.edu"]
-    }
-}
+receipts: dict[int, Receipt] = {}
+next_receipt_id = 1
 
 
 @app.get("/")
@@ -47,21 +35,33 @@ def root():
     return RedirectResponse(url="/static/index.html")
 
 
-@app.get("/activities")
-def get_activities():
-    return activities
+@app.get("/receipts", response_model=list[Receipt])
+def get_receipts(category: Optional[str] = None):
+    items = list(receipts.values())
+    if category:
+        items = [receipt for receipt in items if receipt.category == category]
+    return sorted(items, key=lambda receipt: receipt.date, reverse=True)
 
 
-@app.post("/activities/{activity_name}/signup")
-def signup_for_activity(activity_name: str, email: str):
-    """Sign up a student for an activity"""
-    # Validate activity exists
-    if activity_name not in activities:
-        raise HTTPException(status_code=404, detail="Activity not found")
+@app.get("/receipts/{receipt_id}", response_model=Receipt)
+def get_receipt(receipt_id: int):
+    if receipt_id not in receipts:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    return receipts[receipt_id]
 
-    # Get the specific activity
-    activity = activities[activity_name]
 
-    # Add student
-    activity["participants"].append(email)
-    return {"message": f"Signed up {email} for {activity_name}"}
+@app.post("/receipts", response_model=Receipt, status_code=201)
+def create_receipt(receipt_data: ReceiptCreate):
+    global next_receipt_id
+    receipt = Receipt(id=next_receipt_id, **receipt_data.model_dump())
+    receipts[next_receipt_id] = receipt
+    next_receipt_id += 1
+    return receipt
+
+
+@app.delete("/receipts/{receipt_id}")
+def delete_receipt(receipt_id: int):
+    if receipt_id not in receipts:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    del receipts[receipt_id]
+    return {"message": "Receipt deleted"}
