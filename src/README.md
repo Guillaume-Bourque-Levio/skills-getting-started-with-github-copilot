@@ -1,50 +1,21 @@
-# Mergington High School Activities API
+# Gestionnaire de reçus
 
-A super simple FastAPI application that allows students to view and sign up for extracurricular activities.
+Une petite application FastAPI pour enregistrer, consulter, filtrer et supprimer ses reçus. Les données sont conservées en mémoire et sont réinitialisées au redémarrage.
 
-## Features
+## Démarrage
 
-- View all available extracurricular activities
-- Sign up for activities
+```bash
+pip install -r ../requirements.txt
+uvicorn app:app --reload
+```
 
-## Getting Started
+Ouvrez ensuite <http://localhost:8000/>.
 
-1. Install the dependencies:
+## API
 
-   ```
-   pip install fastapi uvicorn
-   ```
-
-2. Run the application:
-
-   ```
-   python app.py
-   ```
-
-3. Open your browser and go to:
-   - API documentation: http://localhost:8000/docs
-   - Alternative documentation: http://localhost:8000/redoc
-
-## API Endpoints
-
-| Method | Endpoint                                                          | Description                                                         |
-| ------ | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
-| GET    | `/activities`                                                     | Get all activities with their details and current participant count |
-| POST   | `/activities/{activity_name}/signup?email=student@mergington.edu` | Sign up for an activity                                             |
-
-## Data Model
-
-The application uses a simple data model with meaningful identifiers:
-
-1. **Activities** - Uses activity name as identifier:
-
-   - Description
-   - Schedule
-   - Maximum number of participants allowed
-   - List of student emails who are signed up
-
-2. **Students** - Uses email as identifier:
-   - Name
-   - Grade level
-
-All data is stored in memory, which means data will be reset when the server restarts.
+| Méthode | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/receipts` | Liste les reçus, avec un filtre optionnel `category` |
+| `GET` | `/receipts/{id}` | Affiche un reçu |
+| `POST` | `/receipts` | Crée un reçu (`merchant`, `amount`, `date`, `category`, `notes`) |
+| `DELETE` | `/receipts/{id}` | Supprime un reçu |
